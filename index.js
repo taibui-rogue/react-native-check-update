@@ -6,7 +6,7 @@ const {CheckUpdate} = NativeModules;
 
 export const PACKAGE_NAME = CheckUpdate.packageName;
 export const CURRENT_VERSION = CheckUpdate.currentVersion;
-export const CURRENT_BUILD = CheckUpdate.currentBuild;
+export const CURRENT_BUILD = "" + CheckUpdate.currentBuild;
 
 export const Status = {
     DEPRECATED: "DEPRECATED",
@@ -107,8 +107,8 @@ export class UpdateChecker extends Component<Props> {
     whenAppSupported = (supportedBuilds) => {
         const {whenAppSupported, minimumInterval = DEFAULT_MINIMUM_INTERVAL} = this.props;
         AsyncStorage.getItem(KEY_LAST_PROMPT_TO_UPDATE).then(value => {
-            if (new Date().getTime() - value > minimumInterval) {
-                AsyncStorage.setItem(KEY_LAST_PROMPT_TO_UPDATE, new Date().getTime());
+            if (!value || new Date().getTime() - parseInt(value) > minimumInterval) {
+                AsyncStorage.setItem(KEY_LAST_PROMPT_TO_UPDATE, new Date().getTime().toString());
                 whenAppSupported?.(supportedBuilds);
             }
         });
