@@ -2,7 +2,7 @@ import React, { Component } from "react";
 import { AppState, NativeModules } from "react-native";
 import AsyncStorage from '@react-native-community/async-storage';
 
-const {CheckUpdate} = NativeModules;
+const { CheckUpdate } = NativeModules;
 
 export const PACKAGE_NAME = CheckUpdate.packageName;
 export const CURRENT_VERSION = CheckUpdate.currentVersion;
@@ -17,9 +17,9 @@ export const Status = {
 type Props = {
     getSupportedBuilds: () => Array<any>,
     minimumInterval?: number,
-    whenAppDeprecated: (Array<string>) => void,
-    whenAppSupported?: (Array<string>) => void,
-    whenAppLatest?: (Array<string>) => void
+    whenAppDeprecated: () => void,
+    whenAppSupported?: () => void,
+    whenAppLatest?: () => void
 };
 
 const DEFAULT_MINIMUM_INTERVAL = 60 * 60 * 1000; // one hour
@@ -63,11 +63,11 @@ export class UpdateChecker extends Component<Props> {
     };
 
     checkForUpdate = async () => {
-        const {getSupportedBuilds} = this.props;
+        const { getSupportedBuilds } = this.props;
         try {
             const supportedBuilds = await getSupportedBuilds();
             const status = this.classifyCurrentBuild(supportedBuilds);
-            this.onResult(status, supportedBuilds);
+            this.onResult(status);
         } catch (e) {
             console.log("UpdateChecker", e.message)
         }
@@ -86,36 +86,36 @@ export class UpdateChecker extends Component<Props> {
         }
     };
 
-    onResult = (status, supportedBuilds) => {
+    onResult = (status) => {
         switch (status) {
             case Status.DEPRECATED:
-                this.whenAppDeprecated(supportedBuilds);
+                this.whenAppDeprecated();
                 break;
             case Status.SUPPORTED:
-                this.whenAppSupported(supportedBuilds);
+                this.whenAppSupported();
                 break;
             case Status.LATEST:
-                this.whenAppLatest(supportedBuilds);
+                this.whenAppLatest();
                 break;
         }
     };
 
-    whenAppDeprecated = (supportedBuilds) => {
-        this.props.whenAppDeprecated?.(supportedBuilds);
+    whenAppDeprecated = () => {
+        this.props.whenAppDeprecated?.();
     };
 
-    whenAppSupported = (supportedBuilds) => {
-        const {whenAppSupported, minimumInterval = DEFAULT_MINIMUM_INTERVAL} = this.props;
+    whenAppSupported = () => {
+        const { whenAppSupported, minimumInterval = DEFAULT_MINIMUM_INTERVAL } = this.props;
         AsyncStorage.getItem(KEY_LAST_PROMPT_TO_UPDATE).then(value => {
             if (!value || new Date().getTime() - parseInt(value) > minimumInterval) {
                 AsyncStorage.setItem(KEY_LAST_PROMPT_TO_UPDATE, new Date().getTime().toString());
-                whenAppSupported?.(supportedBuilds);
+                whenAppSupported?.();
             }
         });
     };
 
-    whenAppLatest = (supportedBuilds) => {
-        this.props.whenAppLatest?.(supportedBuilds);
+    whenAppLatest = () => {
+        this.props.whenAppLatest?.();
     };
 
     render() {
