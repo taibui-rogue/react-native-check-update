@@ -15,6 +15,10 @@
   "keywords": [
     "react-native"
   ],
+  "author": {
+    "name": "Tai Bui",
+    "email": "taibui.rogue@gmail.com"
+  },
   "license": "MIT",
   "licenseFilename": "LICENSE",
   "readmeFilename": "README.md",
